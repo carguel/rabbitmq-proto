@@ -26,34 +26,44 @@ public class ServeurCentral {
 			}
 		});
 		
-		int message_number = 1000;
-		if (argv.length >= 1) {
-			message_number = Integer.parseInt(argv[0]);
+		int messageNumber = 1000;
+		int messageSize = 100;
+		String rabbitmqHost = "localhost";
+		
+		for (int i= 0; i < argv.length; i++) {
+			if (argv[i].equals("-n")) {
+				messageNumber = Integer.parseInt(argv[i+1]);
+				i++;
+			}
+			else if (argv[i].equals("-s")) {
+				messageSize = Integer.parseInt(argv[i + 1]);
+			}
+			else if (argv[i].equals("-h")) {
+				rabbitmqHost = argv[i + 1];
+			}
+			
 		}
 		
-		String message = "message from Serveur Central";
-		if (argv.length >= 2) {
-			message = argv[1];
-		}
+		String message = Helper.generateMessage(messageSize);
 		
-		sc.start(message_number, message);
+		sc.start(messageNumber, message, rabbitmqHost);
 	}
 	
 	protected int getSentMessages() {
 		return sent_messages;
 	}
 
-	public void start(int message_number, String message) throws IOException {
+	public void start(int messageNumber, String message, String rabbitmqHost) throws IOException {
 
 
 		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost("localhost");
+		factory.setHost(rabbitmqHost);
 		Connection connection = factory.newConnection();
 		Channel channel = connection.createChannel();
 
 		channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
 		
-		while (sent_messages < message_number) {
+		while (sent_messages < messageNumber) {
 			channel.basicPublish( "", TASK_QUEUE_NAME, 
 					MessageProperties.PERSISTENT_TEXT_PLAIN,
 					message.getBytes());
