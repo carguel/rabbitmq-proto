@@ -65,7 +65,7 @@ public class ServeurCentral {
 		
 		while (sent_messages < messageNumber) {
 			channel.basicPublish( "", TASK_QUEUE_NAME, 
-					MessageProperties.PERSISTENT_TEXT_PLAIN,
+					MessageProperties.TEXT_PLAIN,
 					message.getBytes());
 			
 			sent_messages++;
